@@ -21,6 +21,15 @@ public class ProceduralDungeonGenerator : MonoBehaviour
 
         MakeRoom(1, 3, RoomType.Boss);
 
+        System.Random rand = new System.Random(100);
+
+        Debug.Log(rand.Next());
+        Debug.Log(rand.Next());
+        Debug.Log(rand.Next());
+        Debug.Log(rand.Next());
+        Debug.Log(rand.Next());
+        Debug.Log(rand.Next());
+
     }
 
     void Update()
