@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,28 +29,32 @@ public class ProceduralDungeonGenerator : MonoBehaviour
     {
         //int roomCounter
 
-        MakeRoom(0, 0, RoomType.Start);
+        #region Make Starting Room and Connected Rooms
 
-        if (rand.NextDouble() > 0.5f)
+        MakeRoomVisual(0, 0, RoomType.Start);
+
+        if (Roll(50))
         {
-            MakeDoor(0, 0, Direction.Right, DoorType.Open);
-            MakeRoom(1, 0, RoomType.Normal);
+            MakeDoorVisual(0, 0, Direction.Right, DoorType.Open);
+            MakeRoomVisual(1, 0, RoomType.Normal);
 
-            MakeDoor(0, 0, Direction.Down, DoorType.Open);
-            MakeRoom(0, -1, RoomType.Normal);
+            MakeDoorVisual(0, 0, Direction.Down, DoorType.Open);
+            MakeRoomVisual(0, -1, RoomType.Normal);
 
-            MakeDoor(0, 0, Direction.Left, DoorType.Open);
-            MakeRoom(-1, 0, RoomType.Normal);
+            MakeDoorVisual(0, 0, Direction.Left, DoorType.Open);
+            MakeRoomVisual(-1, 0, RoomType.Normal);
         }
         else
         {
-            MakeDoor(0, 0, Direction.Right, DoorType.Open);
-            MakeRoom(1, 0, RoomType.Normal);
+            MakeDoorVisual(0, 0, Direction.Right, DoorType.Open);
+            MakeRoomVisual(1, 0, RoomType.Normal);
 
-            MakeDoor(0, 0, Direction.Left, DoorType.Open);
-            MakeRoom(-1, 0, RoomType.Normal);
+            MakeDoorVisual(0, 0, Direction.Left, DoorType.Open);
+            MakeRoomVisual(-1, 0, RoomType.Normal);
         }
-        
+
+        #endregion
+
     }
 
     private void DestroyDungeon()
@@ -63,11 +68,11 @@ public class ProceduralDungeonGenerator : MonoBehaviour
         doors.Clear();
     }
 
-    private void MakeRoom(int x, int y, RoomType roomType)
+    private void MakeRoomVisual(int x, int y, RoomType roomType)
     {
-        GameObject room = Instantiate(Resources.Load<GameObject>("Room"));
-        room.name = "Room " + x + "," + y;
-        room.transform.position = new Vector3(x, y, 0);
+        GameObject roomVisual = Instantiate(Resources.Load<GameObject>("Room"));
+        roomVisual.name = "Room " + x + "," + y;
+        roomVisual.transform.position = new Vector3(x, y, 0);
 
         #region Determine Room Color Based on Type
 
@@ -95,17 +100,17 @@ public class ProceduralDungeonGenerator : MonoBehaviour
                 break;
         }
 
-        room.GetComponent<SpriteRenderer>().color = roomColor;
+        roomVisual.GetComponent<SpriteRenderer>().color = roomColor;
 
         #endregion
 
-        rooms.AddLast(room);
+        rooms.AddLast(roomVisual);
     }
 
-    private void MakeDoor(int x, int y, Direction sideOfRoom, DoorType doorType)
+    private void MakeDoorVisual(int x, int y, Direction sideOfRoom, DoorType doorType)
     {
-        GameObject door = Instantiate(Resources.Load<GameObject>("Door"));
-        door.name = "Door " + x + "," + y + ", " + sideOfRoom;
+        GameObject doorVisual = Instantiate(Resources.Load<GameObject>("Door"));
+        doorVisual.name = "Door " + x + "," + y + ", " + sideOfRoom;
 
         Vector2 offSet = Vector2.zero;
         switch (sideOfRoom)
@@ -124,7 +129,7 @@ public class ProceduralDungeonGenerator : MonoBehaviour
                 break;
         }
 
-        door.transform.position = (new Vector3(x, y, 0) + new Vector3(offSet.x, offSet.y, 0));
+        doorVisual.transform.position = (new Vector3(x, y, 0) + new Vector3(offSet.x, offSet.y, 0));
 
         #region Determine Door Color Based on Type
 
@@ -150,11 +155,16 @@ public class ProceduralDungeonGenerator : MonoBehaviour
 
         }
 
-        door.GetComponent<SpriteRenderer>().color = doorColor;
+        doorVisual.GetComponent<SpriteRenderer>().color = doorColor;
 
         #endregion
 
-        doors.AddLast(door);
+        doors.AddLast(doorVisual);
+    }
+
+    private bool Roll(float percentageChance)
+    {
+        return rand.NextDouble() < percentageChance / 100f;
     }
 
 }
@@ -183,3 +193,53 @@ public enum DoorType
     Bombable,
 }
 
+class Coordinate
+{
+    public int x, y;
+
+    public Coordinate(int x, int y)
+    {
+        this.x = x;
+        this.y = y;
+    }
+
+    public bool IsEqualTo(Coordinate otherCoord)
+    {
+        if(x == otherCoord.x && y == otherCoord.y)
+            return true;
+        return false;
+    }
+}
+
+class Door
+{
+    public GameObject gameObject;
+    public DoorType type;
+    public Direction direction;
+    public Room room;
+
+    public Door(DoorType type, Direction direction, Room room)
+    {
+        this.type = type;
+        this.direction = direction;
+        this.room = room;
+    }
+
+}
+
+class Room
+{
+    public GameObject gameObject;
+    public RoomType type;
+    public Coordinate coordinate;
+    public LinkedList<Door> doors;
+    public LinkedList<Room> neighbourRooms;
+    
+    public Room(RoomType type, Coordinate coordinate)
+    {
+        this.type = type;
+        this.coordinate = coordinate;
+        doors = new LinkedList<Door>();
+        neighbourRooms = new LinkedList<Room>();
+    }
+}
