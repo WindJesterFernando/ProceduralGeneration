@@ -159,7 +159,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
+  m_BackGroundColor: {r: 0.18626207, g: 0.16349237, b: 0.20754719, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -226,7 +226,7 @@ GameObject:
   - component: {fileID: 766185274}
   - component: {fileID: 766185273}
   m_Layer: 0
-  m_Name: ProceduralGeneration
+  m_Name: ProceduralDungeonGenerator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -241,7 +241,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 766185272}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9dd3a04761900421b96e0e5c13d80317, type: 3}
+  m_Script: {fileID: 11500000, guid: 2e688f3db077845ab956850ae9144cd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &766185274
