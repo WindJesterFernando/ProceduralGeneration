@@ -4,40 +4,66 @@ using UnityEngine;
 
 public class ProceduralDungeonGenerator : MonoBehaviour
 {
+    LinkedList<GameObject> rooms, doors;
+    System.Random rand;
 
     void Start()
     {
-        MakeRoom(0, 0, RoomType.Start);
-        MakeDoor(0, 0, Direction.Right, DoorType.Locked);
-
-        MakeRoom(1, 0, RoomType.Normal);
-        MakeDoor(1, 0, Direction.Up, DoorType.Open);
-
-        MakeRoom(1, 1, RoomType.Normal);
-        MakeDoor(1, 1, Direction.Up, DoorType.Bombable);
-
-        MakeRoom(1, 2, RoomType.Normal);
-        MakeDoor(1, 2, Direction.Up, DoorType.ShutUntilRoomIsCleared);
-
-        MakeRoom(1, 3, RoomType.Boss);
-
-        System.Random rand = new System.Random(100);
-
-        Debug.Log(rand.Next());
-        Debug.Log(rand.Next());
-        Debug.Log(rand.Next());
-        Debug.Log(rand.Next());
-        Debug.Log(rand.Next());
-        Debug.Log(rand.Next());
-
+        rand = new System.Random(50);
+        rooms = new LinkedList<GameObject>();
+        doors = new LinkedList<GameObject>();
+        ProceduralGenerateDungeon();
     }
 
     void Update()
     {
-
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            DestroyDungeon();
+            ProceduralGenerateDungeon();
+        }
     }
 
-    public void MakeRoom(int x, int y, RoomType roomType)
+    private void ProceduralGenerateDungeon()
+    {
+        //int roomCounter
+
+        MakeRoom(0, 0, RoomType.Start);
+
+        if (rand.NextDouble() > 0.5f)
+        {
+            MakeDoor(0, 0, Direction.Right, DoorType.Open);
+            MakeRoom(1, 0, RoomType.Normal);
+
+            MakeDoor(0, 0, Direction.Down, DoorType.Open);
+            MakeRoom(0, -1, RoomType.Normal);
+
+            MakeDoor(0, 0, Direction.Left, DoorType.Open);
+            MakeRoom(-1, 0, RoomType.Normal);
+        }
+        else
+        {
+            MakeDoor(0, 0, Direction.Right, DoorType.Open);
+            MakeRoom(1, 0, RoomType.Normal);
+
+            MakeDoor(0, 0, Direction.Left, DoorType.Open);
+            MakeRoom(-1, 0, RoomType.Normal);
+        }
+        
+    }
+
+    private void DestroyDungeon()
+    {
+        foreach (GameObject r in rooms)
+            Destroy(r);
+        foreach (GameObject d in doors)
+            Destroy(d);
+
+        rooms.Clear();
+        doors.Clear();
+    }
+
+    private void MakeRoom(int x, int y, RoomType roomType)
     {
         GameObject room = Instantiate(Resources.Load<GameObject>("Room"));
         room.name = "Room " + x + "," + y;
@@ -72,9 +98,11 @@ public class ProceduralDungeonGenerator : MonoBehaviour
         room.GetComponent<SpriteRenderer>().color = roomColor;
 
         #endregion
+
+        rooms.AddLast(room);
     }
 
-    public void MakeDoor(int x, int y, Direction sideOfRoom, DoorType doorType)
+    private void MakeDoor(int x, int y, Direction sideOfRoom, DoorType doorType)
     {
         GameObject door = Instantiate(Resources.Load<GameObject>("Door"));
         door.name = "Door " + x + "," + y + ", " + sideOfRoom;
@@ -119,12 +147,14 @@ public class ProceduralDungeonGenerator : MonoBehaviour
             case DoorType.None:
                 doorColor = Color.magenta / 2f + Color.black / 2f;
                 break;
-            
+
         }
 
         door.GetComponent<SpriteRenderer>().color = doorColor;
 
         #endregion
+
+        doors.AddLast(door);
     }
 
 }
