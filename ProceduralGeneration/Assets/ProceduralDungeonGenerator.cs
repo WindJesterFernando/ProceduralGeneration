@@ -5,15 +5,20 @@ using UnityEngine;
 
 public class ProceduralDungeonGenerator : MonoBehaviour
 {
-    LinkedList<GameObject> rooms, doors;
+    LinkedList<GameObject> roomVisuals, doorVisuals;
+    LinkedList<Room> rooms;
+    LinkedList<Door> doors;
     System.Random rand;
 
     void Start()
     {
         rand = new System.Random(50);
-        rooms = new LinkedList<GameObject>();
-        doors = new LinkedList<GameObject>();
+        rooms = new LinkedList<Room>();
+        doors = new LinkedList<Door>();
+        roomVisuals = new LinkedList<GameObject>();
+        doorVisuals = new LinkedList<GameObject>();
         ProceduralGenerateDungeon();
+        CreateVisualsFromModelData();
     }
 
     void Update()
@@ -22,6 +27,7 @@ public class ProceduralDungeonGenerator : MonoBehaviour
         {
             DestroyDungeon();
             ProceduralGenerateDungeon();
+            CreateVisualsFromModelData();
         }
     }
 
@@ -31,26 +37,39 @@ public class ProceduralDungeonGenerator : MonoBehaviour
 
         #region Make Starting Room and Connected Rooms
 
-        MakeRoomVisual(0, 0, RoomType.Start);
+        Room startingRoom = new Room(RoomType.Start, new Coordinate(0, 0));
+        rooms.AddLast(startingRoom);
 
         if (Roll(50))
         {
-            MakeDoorVisual(0, 0, Direction.Right, DoorType.Open);
-            MakeRoomVisual(1, 0, RoomType.Normal);
+            Door d = new Door(DoorType.Open, Direction.Right, startingRoom);
+            doors.AddLast(d);
 
-            MakeDoorVisual(0, 0, Direction.Down, DoorType.Open);
-            MakeRoomVisual(0, -1, RoomType.Normal);
+            Room r = new Room(RoomType.Normal, new Coordinate(1, 0));
+            rooms.AddLast(r);
 
-            MakeDoorVisual(0, 0, Direction.Left, DoorType.Open);
-            MakeRoomVisual(-1, 0, RoomType.Normal);
+            d = new Door(DoorType.Open, Direction.Down, startingRoom);
+            doors.AddLast(d);
+            r = new Room(RoomType.Normal, new Coordinate(0, -1));
+            rooms.AddLast(r);
+
+            d = new Door(DoorType.Open, Direction.Left, startingRoom);
+            doors.AddLast(d);
+            r = new Room(RoomType.Normal, new Coordinate(-1, 0));
+            rooms.AddLast(r);
         }
         else
         {
-            MakeDoorVisual(0, 0, Direction.Right, DoorType.Open);
-            MakeRoomVisual(1, 0, RoomType.Normal);
+            Door d = new Door(DoorType.Open, Direction.Right, startingRoom);
+            doors.AddLast(d);
 
-            MakeDoorVisual(0, 0, Direction.Left, DoorType.Open);
-            MakeRoomVisual(-1, 0, RoomType.Normal);
+            Room r = new Room(RoomType.Normal, new Coordinate(1, 0));
+            rooms.AddLast(r);
+
+            d = new Door(DoorType.Open, Direction.Left, startingRoom);
+            doors.AddLast(d);
+            r = new Room(RoomType.Normal, new Coordinate(-1, 0));
+            rooms.AddLast(r);
         }
 
         #endregion
@@ -59,26 +78,31 @@ public class ProceduralDungeonGenerator : MonoBehaviour
 
     private void DestroyDungeon()
     {
-        foreach (GameObject r in rooms)
+        foreach (GameObject r in roomVisuals)
             Destroy(r);
-        foreach (GameObject d in doors)
+        foreach (GameObject d in doorVisuals)
             Destroy(d);
+
+        roomVisuals.Clear();
+        doorVisuals.Clear();
 
         rooms.Clear();
         doors.Clear();
     }
 
-    private void MakeRoomVisual(int x, int y, RoomType roomType)
+    private GameObject MakeRoomVisual(Room room)
     {
         GameObject roomVisual = Instantiate(Resources.Load<GameObject>("Room"));
-        roomVisual.name = "Room " + x + "," + y;
-        roomVisual.transform.position = new Vector3(x, y, 0);
+        room.visual = roomVisual;
+        Coordinate coord = room.coordinate;
+        roomVisual.name = "Room " + coord.x + "," + coord.y;
+        roomVisual.transform.position = new Vector3(coord.x, coord.y, 0);
 
         #region Determine Room Color Based on Type
 
         Color roomColor = Color.magenta;
 
-        switch (roomType)
+        switch (room.type)
         {
             case RoomType.Normal:
                 roomColor = Color.white;
@@ -104,16 +128,21 @@ public class ProceduralDungeonGenerator : MonoBehaviour
 
         #endregion
 
-        rooms.AddLast(roomVisual);
+        roomVisuals.AddLast(roomVisual);
+        return roomVisual;
     }
 
-    private void MakeDoorVisual(int x, int y, Direction sideOfRoom, DoorType doorType)
+    private void MakeDoorVisual(Door door)
     {
         GameObject doorVisual = Instantiate(Resources.Load<GameObject>("Door"));
-        doorVisual.name = "Door " + x + "," + y + ", " + sideOfRoom;
+        door.visual = doorVisual;
+        Coordinate coord = door.room.coordinate;
+        doorVisual.name = "Door " + coord.x + "," + coord.y + ", " + door.sideOfRoom;
+
+        #region Determine Postition OffSet Based On SideOfRoom
 
         Vector2 offSet = Vector2.zero;
-        switch (sideOfRoom)
+        switch (door.sideOfRoom)
         {
             case Direction.Up:
                 offSet = new Vector2(0, 0.5f);
@@ -129,13 +158,15 @@ public class ProceduralDungeonGenerator : MonoBehaviour
                 break;
         }
 
-        doorVisual.transform.position = (new Vector3(x, y, 0) + new Vector3(offSet.x, offSet.y, 0));
+        #endregion
+
+        doorVisual.transform.position = (new Vector3(coord.x, coord.y, 0) + new Vector3(offSet.x, offSet.y, 0));
 
         #region Determine Door Color Based on Type
 
         Color doorColor = Color.magenta / 2f + Color.black / 2f;
 
-        switch (doorType)
+        switch (door.type)
         {
             case DoorType.Open:
                 doorColor = Color.white / 2f + Color.black / 2f;
@@ -159,7 +190,19 @@ public class ProceduralDungeonGenerator : MonoBehaviour
 
         #endregion
 
-        doors.AddLast(doorVisual);
+        doorVisuals.AddLast(doorVisual);
+    }
+
+    private void CreateVisualsFromModelData()
+    {
+        foreach (Room r in rooms)
+        {
+            MakeRoomVisual(r);
+        }
+        foreach (Door d in doors)
+        {
+            MakeDoorVisual(d);
+        }
     }
 
     private bool Roll(float percentageChance)
@@ -205,7 +248,7 @@ class Coordinate
 
     public bool IsEqualTo(Coordinate otherCoord)
     {
-        if(x == otherCoord.x && y == otherCoord.y)
+        if (x == otherCoord.x && y == otherCoord.y)
             return true;
         return false;
     }
@@ -213,15 +256,15 @@ class Coordinate
 
 class Door
 {
-    public GameObject gameObject;
+    public GameObject visual;
     public DoorType type;
-    public Direction direction;
+    public Direction sideOfRoom;
     public Room room;
 
-    public Door(DoorType type, Direction direction, Room room)
+    public Door(DoorType type, Direction sideOfRoom, Room room)
     {
         this.type = type;
-        this.direction = direction;
+        this.sideOfRoom = sideOfRoom;
         this.room = room;
     }
 
@@ -229,12 +272,12 @@ class Door
 
 class Room
 {
-    public GameObject gameObject;
+    public GameObject visual;
     public RoomType type;
     public Coordinate coordinate;
     public LinkedList<Door> doors;
     public LinkedList<Room> neighbourRooms;
-    
+
     public Room(RoomType type, Coordinate coordinate)
     {
         this.type = type;
