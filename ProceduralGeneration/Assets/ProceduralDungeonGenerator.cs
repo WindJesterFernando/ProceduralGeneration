@@ -16,7 +16,7 @@ public static class ProceduralDungeonGenerator
         rand = new System.Random(RandomGenSeed);
         rooms = new LinkedList<Room>();
         doors = new LinkedList<Door>();
-        ProcedurallyGenerateDungeon(roomCounter);
+        ProcedurallyGenerateDungeon();
     }
 
     private static Room AddRoom(RoomType roomType, Coordinate coordinate)
@@ -40,6 +40,58 @@ public static class ProceduralDungeonGenerator
 
     private static Direction RandomDirection() => (Direction) Random.Range(0, 4);
     
+
+    #region TASKS
+
+        /*
+
+        TASK LIST:
+        Starting room is always at the center
+        Starting room must have 2 or 3 doors
+        Clean up code
+
+
+
+
+        We want 20 rooms
+        All rooms must be connected
+        we want branching paths.....
+
+
+        “We take a room, choose a direction, we make a room/door in that direction”
+        “Repeat 20 times”
+        “Roll to see how many directions we have for a room”
+        “Make sure there’s no room there”, do not create repeat rooms
+        “Deciding which room is the current room to go with”
+        “Tree not bush”
+        “The last direction generated has a highest chance of being repeat”
+
+
+
+
+        Secret doors must not interfere with main path, they must be off to the side
+        One Shop room
+        Shop room must be locked & only have one door accessing it
+        One Boss room
+        Boss room must not be next to the start, must be a certain distance
+        Boss room must only be connected to one other room
+
+
+        for loop
+        Get the direction of previous room: rooms.First.direction = 
+        Use the direction to influence room creation of the next room: Random.Range(0, 4);
+        Edge case we need some way to escape from trying to create impossible rooms:
+        E.X: Tries to create two rooms when there's only space for one
+        We know with the 4 directions
+        Exit code if number of rooms in all possible directions cannot be achieved to avoid infinite loop 
+    
+    
+        give more weight to current direction
+        if repeatdirection new direction = old direction, else new direction = Random.Range(0,4)
+
+        */
+
+    #endregion
 
     private static List<Room> GenerateNeighbours(int doorCount,Room parent)
     {
@@ -72,140 +124,32 @@ public static class ProceduralDungeonGenerator
         return neighbours;
     }
 
-
-    public static void ProcedurallyGenerateDungeon(int roomCount, Room previousRoom = null)
+    public static void ProcedurallyGenerateDungeon()
     {
-        Room room = previousRoom;
-        if (roomCount == 0)
-        {
-            //BossRoom
-            return;
-        }
+        #region Step 1: Create Starting Room
 
-        if (room == null)
-        {
-            //StartingRoom
-            room = AddRoom(RoomType.Start, new Coordinate(0, 0));
-            room.doors.AddLast(AddDoor(DoorType.Open, Direction.Right, room));
-            room.doors.AddLast(AddDoor(DoorType.Open, Direction.Left, room));
-        }
-
-
-        #region Genertion of Door Counts
-        int doorCount = Roll(50) ? 2 : 3;
+        var StartingRoom = AddRoom(RoomType.Start, new Coordinate(0, 0));
+        StartingRoom.doors.AddLast(AddDoor(DoorType.Open, Direction.Right, StartingRoom));
+        StartingRoom.doors.AddLast(AddDoor(DoorType.Open, Direction.Left, StartingRoom));
 
         #endregion
 
-        var childRooms = GenerateNeighbours(doorCount, room);
-        foreach(Room childRoom in childRooms)
-        {
-            ProcedurallyGenerateDungeon(roomCount - 1, childRoom);
-        }
-        //TASK LIST:
-        //Starting room is always at the center
-        // Starting room must have 2 or 3 doors
-        //Clean up code
+    
+        #region Step 2: Generate Neighbours
 
+        // int doorcount = DetermineDoorCount(StartingRoom);
 
+        // var childRooms = GenerateNeighbours(doorcount, StartingRoom);
 
+        // foreach(Room room in childRooms)
+        // {
+        //     var count = DetermineDoorCount(room);
+        //     GenerateNeighbours(count, room);
+        // }
 
-        // We want 20 rooms
-        // All rooms must be connected
-        // we want branching paths.....
-
-
-        // “We take a room, choose a direction, we make a room/door in that direction”
-        // “Repeat 20 times”
-        // “Roll to see how many directions we have for a room”
-        // “Make sure there’s no room there”, do not create repeat rooms
-        // “Deciding which room is the current room to go with”
-        // “Tree not bush”
-        // “The last direction generated has a highest chance of being repeat”
-
-
-
-
-        // Secret doors must not interfere with main path, they must be off to the side
-        // One Shop room
-        // Shop room must be locked & only have one door accessing it
-        // One Boss room
-        // Boss room must not be next to the start, must be a certain distance
-        // Boss room must only be connected to one other room
-
-
-        //int roomCounter
-
-        // Room CreateStartingRoom() => AddRoom(RoomType.Start, new Coordinate(0, 0));
-
-        //Room startingRoom = AddRoom(RoomType.Start, new Coordinate(0, 0));
-
-        // #region Create Rooms Connected to Starting Room
-
-        // //AddRoom(RoomType.Normal, new Coordinate(1, 0));
-
-        // //AddRoom(RoomType.Normal, new Coordinate(-1, 0));
-
-        // // if (Roll(50))
-        // // {
-        // //     room.doors.AddLast(AddDoor(DoorType.Open, Direction.Down, /*startingRoom*/room));
-        // //     //AddRoom(RoomType.Normal, new Coordinate(0, -1));
-        // // }
-
-        // #endregion
-
-
+        #endregion
     }
   
-        
-        // foreach(Door door in startingRoom.doors)
-        // {
-        //     Coordinate newRoomCoordinate = CalculateNewRoomCoordinate(startingRoom.coordinate, door.sideOfRoom);
-        //     var newRoom = AddRoom(RoomType.Normal,newRoomCoordinate);
-
-        //     // only 2 options
-        //     int doorCount = Roll(50) ? 2 : 3;//Random.Range(2, 4);
-
-        //     for (int i = 0; i < doorCount; i++)
-        //     {
-        //         Direction newRoomDirection = RandomDirection();
-        //         var directions = newRoom.doors.Select(door => door.sideOfRoom);
-        //         while (directions.Contains(newRoomDirection)) 
-        //         {
-        //             newRoomDirection = RandomDirection();
-        //         }
-                
-        //         //Door newDoor = AddDoor(DoorType.Open, newRoomDirection, newRoom);
-        //         newRoom.doors.AddLast(AddDoor(DoorType.Open, newRoomDirection, newRoom));
-
-        //         // if(Roll(50))
-        //         // {
-        //         //     //AddDoor(DoorType.Open, sideofRoom, newRoom);
-        //         // }
-        //         // else
-        //         // {
-        //         //     AddDoor(DoorType.Open, RandomDirection(), newRoom);
-        //         // }
-        //     }
-
-
-       
-
-        
-        // for loop
-        // Get the direction of previous room: rooms.First.direction = 
-        // Use the direction to influence room creation of the next room: Random.Range(0, 4);
-        // Edge case we need some way to escape from trying to create impossible rooms:
-        // E.X: Tries to create two rooms when there's only space for one
-        // We know with the 4 directions
-        // Exit code if number of rooms in all possible directions cannot be achieved to avoid infinite loop 
-    
-    
-        //give more weight to current direction
-        //if repeatdirection new direction = old direction, else new direction = Random.Range(0,4)
-    
-    
-    
-
     private static Coordinate GetOffset(Direction sideOfRoom)
     {
         Coordinate offset = new Coordinate(0, 0);

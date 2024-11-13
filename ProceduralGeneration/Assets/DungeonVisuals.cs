@@ -18,7 +18,7 @@ public static class DungeonVisuals
             UnityEngine.GameObject.Destroy(r);
         foreach (GameObject d in doorVisuals)
             UnityEngine.GameObject.Destroy(d);
-
+    
         roomVisuals.Clear();
         doorVisuals.Clear();
     }
