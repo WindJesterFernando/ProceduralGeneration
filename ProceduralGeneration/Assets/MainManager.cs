@@ -13,7 +13,7 @@ public class MainManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.A))
         {
             ProceduralDungeonGenerator.DestroyDungeon();
-            DungeonVisuals.DestroyDungeon();
+            DungeonVisuals.DestroyDungeonVisuals();
             ProceduralDungeonGenerator.ProcedurallyGenerateDungeon();
             DungeonVisuals.CreateVisualsFromModelData();
         }

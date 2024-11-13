@@ -12,7 +12,7 @@ public static class DungeonVisuals
         CreateVisualsFromModelData();
     }
 
-    public static void DestroyDungeon()
+    public static void DestroyDungeonVisuals()
     {
         foreach (GameObject r in roomVisuals)
             UnityEngine.GameObject.Destroy(r);

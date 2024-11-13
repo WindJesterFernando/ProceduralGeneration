@@ -1,75 +1,87 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst.CompilerServices;
 
 public static class ProceduralDungeonGenerator
 {
     static LinkedList<Room> rooms;
     static LinkedList<Door> doors;
     static System.Random rand;
+    const int RandomGenSeed = 50;
 
     public static void Init()
     {
-        rand = new System.Random(50);
+        rand = new System.Random(RandomGenSeed);
         rooms = new LinkedList<Room>();
         doors = new LinkedList<Door>();
         ProcedurallyGenerateDungeon();
     }
-    
+
+    private static Room AddRoom(RoomType roomType, Coordinate coordinate)
+    {
+        Room room = new Room(roomType, coordinate);
+        rooms.AddLast(room);
+        return room;
+    }
+
+    private static Door AddDoor(DoorType doorType, Direction direction, Room startingRoom) 
+    {
+        Door door = new Door(doorType, direction, startingRoom);
+        doors.AddLast(door);
+        return door;
+    }
+
+    private static bool Roll(float percentageChance)
+    {
+        return rand.NextDouble() < percentageChance / 100f;
+    }
+
     public static void ProcedurallyGenerateDungeon()
     {
+
+        //TASK LIST:
+        //Starting room is always at the center
+        // Starting room must have 2 or 3 doors
+        //Clean up code
+
+        // We want 20 rooms
+        // All rooms must be connected
+
+        // Secret doors must not interfere with main path, they must be off to the side
+        // One Shop room
+        // Shop room must be locked & only have one door accessing it
+        // One Boss room
+        // Boss room must not be next to the start, must be a certain distance
+        // Boss room must only be connected to one other room
+
+
         //int roomCounter
 
-        #region Make Starting Room and Connected Rooms
+        // Room CreateStartingRoom() => AddRoom(RoomType.Start, new Coordinate(0, 0));
+        Room startingRoom = AddRoom(RoomType.Start, new Coordinate(0, 0));
 
-        Room startingRoom = new Room(RoomType.Start, new Coordinate(0, 0));
-        rooms.AddLast(startingRoom);
+        #region Create Rooms Connected to Starting Room
+
+        AddDoor(DoorType.Open, Direction.Right, startingRoom);
+        AddRoom(RoomType.Normal, new Coordinate(1, 0));
+
+        AddDoor(DoorType.Open, Direction.Left, startingRoom);
+        AddRoom(RoomType.Normal, new Coordinate(-1, 0));
 
         if (Roll(50))
         {
-            Door d = new Door(DoorType.Open, Direction.Right, startingRoom);
-            doors.AddLast(d);
-
-            Room r = new Room(RoomType.Normal, new Coordinate(1, 0));
-            rooms.AddLast(r);
-
-            d = new Door(DoorType.Open, Direction.Down, startingRoom);
-            doors.AddLast(d);
-            r = new Room(RoomType.Normal, new Coordinate(0, -1));
-            rooms.AddLast(r);
-
-            d = new Door(DoorType.Open, Direction.Left, startingRoom);
-            doors.AddLast(d);
-            r = new Room(RoomType.Normal, new Coordinate(-1, 0));
-            rooms.AddLast(r);
-        }
-        else
-        {
-            Door d = new Door(DoorType.Open, Direction.Right, startingRoom);
-            doors.AddLast(d);
-
-            Room r = new Room(RoomType.Normal, new Coordinate(1, 0));
-            rooms.AddLast(r);
-
-            d = new Door(DoorType.Open, Direction.Left, startingRoom);
-            doors.AddLast(d);
-            r = new Room(RoomType.Normal, new Coordinate(-1, 0));
-            rooms.AddLast(r);
+            AddDoor(DoorType.Open, Direction.Down, startingRoom);
+            AddRoom(RoomType.Normal, new Coordinate(0, -1));
         }
 
         #endregion
 
     }
 
+
     public static void DestroyDungeon()
     {
         rooms.Clear();
         doors.Clear();
-    }
-
-    private static bool Roll(float percentageChance)
-    {
-        return rand.NextDouble() < percentageChance / 100f;
     }
 
     public static LinkedList<Room> GetRooms()
