@@ -14,7 +14,7 @@ public class MainManager : MonoBehaviour
         {
             ProceduralDungeonGenerator.DestroyDungeon();
             DungeonVisuals.DestroyDungeonVisuals();
-            ProceduralDungeonGenerator.ProcedurallyGenerateDungeon();
+            ProceduralDungeonGenerator.ProcedurallyGenerateDungeon(10);
             DungeonVisuals.CreateVisualsFromModelData();
         }
     }
