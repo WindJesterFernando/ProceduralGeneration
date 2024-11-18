@@ -80,6 +80,9 @@ public static class DungeonVisuals
                 CreateDoorVisual(d);
             }
         }
+
+        //position camera to center on dungeon
+        //move camera back
     }
 
     public static void DestroyDungeonVisuals()

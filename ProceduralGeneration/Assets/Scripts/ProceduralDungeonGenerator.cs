@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using Unity.VisualScripting;
 
 public static partial class ProceduralDungeonGenerator
 {
@@ -50,19 +48,12 @@ public static partial class ProceduralDungeonGenerator
 
         Room superSecretRoom = AddRoom(RoomType.SuperSecret, new Coordinate(0, -4));
         AddDoor(DoorType.Bombable, corridorRoom2, superSecretRoom);
-
-        foreach(Room r in GetDungeonRooms())
-        {
-
-        }
-
-        foreach(Door d in GetDungeonDoors())
-        {
-            
-        }
-
+        
         UnityEngine.Debug.Log("There are " + GetDungeonRooms().Count + " rooms in this dungeon.");
         UnityEngine.Debug.Log("There are " + GetDungeonDoors().Count + " doors in this dungeon.");
+
+        foreach(Room r in GetDungeonRooms()) { }
+        foreach(Door d in GetDungeonDoors()) { }
     }
 
 }
