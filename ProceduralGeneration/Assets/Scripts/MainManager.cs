@@ -6,6 +6,8 @@ public class MainManager : MonoBehaviour
     {
         ProceduralDungeonGenerator.Init();
         DungeonVisuals.Init();
+        ProceduralDungeonGenerator.ProcedurallyGenerateDungeon();
+        DungeonVisuals.CreateVisualsFromModelData();
     }
 
     void Update()
@@ -14,7 +16,7 @@ public class MainManager : MonoBehaviour
         {
             ProceduralDungeonGenerator.DestroyDungeon();
             DungeonVisuals.DestroyDungeonVisuals();
-            ProceduralDungeonGenerator.ProcedurallyGenerateDungeon(10);
+            ProceduralDungeonGenerator.ProcedurallyGenerateDungeon();
             DungeonVisuals.CreateVisualsFromModelData();
         }
     }
